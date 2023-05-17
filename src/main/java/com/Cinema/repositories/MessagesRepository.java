@@ -2,14 +2,13 @@ package com.Cinema.repositories;
 
 import com.Cinema.entyties.Film;
 import com.Cinema.entyties.Message;
-import com.Cinema.entyties.Session;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface Messages extends JpaRepository<Session, Integer> {
+public interface MessagesRepository extends JpaRepository<Message, Integer> {
     @Query(nativeQuery = true,
             value = "SELECT m.* " +
                     "FROM message m " +

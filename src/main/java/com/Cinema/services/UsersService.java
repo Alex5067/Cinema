@@ -6,9 +6,11 @@ import com.Cinema.repositories.UsersRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.Cinema.entyties.User;
 import com.Cinema.repositories.UsersRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service("usersService")
 public class UsersService {
 
     @Autowired
