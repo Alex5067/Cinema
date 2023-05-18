@@ -1,11 +1,13 @@
 package com.Cinema.services;
 
+import com.Cinema.entyties.UserDetailsImpl;
 import jakarta.persistence.NoResultException;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.Cinema.repositories.UsersRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.Cinema.entyties.User;
-import com.Cinema.repositories.UsersRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -45,5 +47,10 @@ public class UsersService {
 
     public boolean findEmail(String email) {
         return userRepository.findEmail(email);
+    }
+
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return ((UserDetailsImpl) authentication.getPrincipal()).getUser();
     }
 }

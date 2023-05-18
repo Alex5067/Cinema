@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service("sessionsService")
-public class SessionsSevice {
+public class SessionsService {
     @Autowired
     SessionsRepository sessionsRepository;
 
