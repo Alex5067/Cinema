@@ -53,13 +53,22 @@ public class AdminController {
     }
 
     @PostMapping("/admin/panel/films")
-    public String addFilmsSave(@RequestParam MultipartFile file, @ModelAttribute("film") Film film)
+    public String addFilmsSave(@RequestParam MultipartFile file, @ModelAttribute("film") Film film) throws Exception
     {
+        String path = "./src/main/resources/posters";
+        String uniqueName = ImageController.saveImage(path, file, file.getContentType());
+        assert uniqueName != null;
+
+        filmsService.saveFilm(new Film(film.getTitle(), film.getYear(), film.getDescription(), uniqueName));
+        return "redirect:/admin/panel";
     }
 
     @GetMapping("/admin/panel/sessions")
     public String addSessions(Model model)
     {
+        model.addAttribute("halls", hallsService.findAllHalls());
+        model.addAttribute("films", filmsService.findAllFilms());
+        return "add-sessions";
     }
 
     @PostMapping("/admin/panel/sessions")
