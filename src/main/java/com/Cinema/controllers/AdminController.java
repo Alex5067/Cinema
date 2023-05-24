@@ -2,6 +2,7 @@ package com.Cinema.controllers;
 
 import com.Cinema.entyties.Film;
 import com.Cinema.entyties.Hall;
+import com.Cinema.entyties.Session;
 import com.Cinema.services.FilmsService;
 import com.Cinema.services.HallsService;
 import com.Cinema.services.SessionsService;
@@ -13,6 +14,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Objects;
 
 @Controller
 public class AdminController {
@@ -26,35 +33,31 @@ public class AdminController {
     @Autowired
     private SessionsService sessionsService;
 
-    @GetMapping( "/admin/panel")
+    @GetMapping("/admin/panel")
     public String index() {
         return "admin-panel";
     }
 
     @GetMapping("/admin/panel/halls")
-    public String addHallsForm(Model model)
-    {
+    public String addHallsForm(Model model) {
         model.addAttribute("hall", new Hall());
         return "add-halls";
     }
 
     @PostMapping("/admin/panel/halls")
-    public String addHallsSave(@ModelAttribute("hall") Hall hall)
-    {
+    public String addHallsSave(@ModelAttribute("hall") Hall hall) {
         hallsService.saveHall(hall);
         return "redirect:/admin/panel";
     }
 
     @GetMapping("/admin/panel/films")
-    public String addFilmsForm(Model model)
-    {
+    public String addFilmsForm(Model model) {
         model.addAttribute("film", new Film());
         return "add-films";
     }
 
     @PostMapping("/admin/panel/films")
-    public String addFilmsSave(@RequestParam MultipartFile file, @ModelAttribute("film") Film film) throws Exception
-    {
+    public String addFilmsSave(@RequestParam MultipartFile file, @ModelAttribute("film") Film film) throws Exception {
         String path = "./src/main/resources/posters";
         String uniqueName = ImageController.saveImage(path, file, file.getContentType());
         assert uniqueName != null;
@@ -64,8 +67,7 @@ public class AdminController {
     }
 
     @GetMapping("/admin/panel/sessions")
-    public String addSessions(Model model)
-    {
+    public String addSessions(Model model) {
         model.addAttribute("halls", hallsService.findAllHalls());
         model.addAttribute("films", filmsService.findAllFilms());
         return "add-sessions";
@@ -73,7 +75,18 @@ public class AdminController {
 
     @PostMapping("/admin/panel/sessions")
     public String submit(@ModelAttribute("selectedHall") String selectedHall, @ModelAttribute("selectedFilm") String selectedFilm,
-                         @ModelAttribute("selectedDate") String selectedDate, @ModelAttribute("selectedPrice") String selectedPrice)
-    {
+                         @ModelAttribute("selectedDate") String selectedDate, @ModelAttribute("selectedPrice") String selectedPrice) throws ParseException {
+        DateFormat originalFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+        DateFormat targetFormat = new SimpleDateFormat("MMMM dd/HH:mm");
+        Date date = originalFormat.parse(selectedDate);
+        String[] splittedDate = targetFormat.format(date).split("/");
+
+        Session session = new Session(Objects.requireNonNull(filmsService.findAllFilms().stream()
+                .filter(s -> s.getTitle().equals(selectedFilm))
+                .findAny().orElse(null)), Objects.requireNonNull(hallsService.findAllHalls().stream()
+                .filter(s -> s.getId() == Integer.parseInt(selectedHall.substring(0, selectedHall.indexOf(' '))))
+                .findAny().orElse(null)), splittedDate[0], splittedDate[1], selectedPrice);
+        sessionsService.saveSession(session);
+        return "redirect:/admin/panel";
     }
 }
